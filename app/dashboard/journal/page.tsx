@@ -204,7 +204,8 @@ export default function KMFJournalPage() {
         post_emotions: form.postEmotions,
         outcome: form.outcome,
         tags: form.tags,
-        wallet_address: 'Guest King',
+        wallet_address: address || 'Local User',
+        user_id: (await supabase.auth.getUser()).data.user?.id,
         on_chain_hash: '',
         created_at: new Date().toISOString(),
       };

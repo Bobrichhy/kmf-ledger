@@ -22,9 +22,13 @@ export default function TradingCalendar() {
   useEffect(() => {
     async function fetchTrades() {
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { data: remoteTrades } = await supabase
           .from('trades')
-          .select('*');
+          .select('*')
+          .eq('user_id', user.id);
         
         const localTrades = kmfStorage.getTrades();
         const allTrades = [...(remoteTrades || []), ...localTrades];

@@ -8,7 +8,9 @@ import {
 } from 'lucide-react';
 import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 interface DashboardLayoutProps { children: ReactNode; }
 
@@ -21,11 +23,30 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { connect } = useConnect();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+      } else {
+        setLoading(false);
+      }
+    };
+    checkUser();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   const shortAddr = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
@@ -79,11 +100,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         })}
       </nav>
 
-      {/* Footer Branding */}
-      <div className="px-4 py-6 mt-auto text-center" style={{ borderTop: '1px solid var(--border-panel)' }}>
-        <p className="text-[0.6rem] tracking-[0.3em] font-bold uppercase" style={{ color: 'var(--text-faint)' }}>
-          Kingdom Minded Financial
-        </p>
+      {/* Logout / Footer Branding */}
+      <div className="px-4 py-5 mt-auto space-y-3" style={{ borderTop: '1px solid var(--border-panel)' }}>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition-all"
+          style={{ background: 'var(--red-dim)', color: 'var(--red-loss)', border: '1px solid rgba(239,83,80,0.2)' }}
+        >
+          <LogOut className="w-4 h-4" /> Exit Kingdom
+        </button>
+        <div className="text-center pt-2">
+          <p className="text-[0.6rem] tracking-[0.3em] font-bold uppercase" style={{ color: 'var(--text-faint)' }}>
+            Kingdom Minded Financial
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -135,7 +165,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <main className="flex-1 overflow-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
         <div className="p-5 lg:p-8 max-w-[1600px] mx-auto">
-          {children}
+          {loading ? (
+             <div className="flex items-center justify-center h-[60vh]">
+               <div className="w-8 h-8 border-2 border-gold-mid/30 border-t-gold-mid rounded-full animate-spin" />
+             </div>
+          ) : children}
         </div>
       </main>
     </div>

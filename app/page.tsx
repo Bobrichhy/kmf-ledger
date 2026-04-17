@@ -8,10 +8,10 @@ export default function Home() {
         <p className="text-[#E5E4E2] text-xl mb-10">Kingdom Minded Financial Trading Journal</p>
 
         <Link
-          href="/dashboard"
+          href="/login"
           className="gold-button px-10 py-4 text-xl rounded-2xl inline-block"
         >
-          Open Dashboard
+          Enter the Kingdom
         </Link>
       </div>
     </div>

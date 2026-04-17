@@ -79,9 +79,13 @@ export default function KMFDashboard() {
   useEffect(() => {
     (async () => {
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { data: remoteTrades } = await supabase
           .from('trades')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
         
         const localTrades = kmfStorage.getTrades();
@@ -96,6 +100,7 @@ export default function KMFDashboard() {
         const { data: streakData } = await supabase
           .from('kmf_streaks')
           .select('current_streak, best_streak')
+          .eq('user_id', user.id)
           .single();
         if (streakData) {
           setStreaks({ current: streakData.current_streak || 0, best: streakData.best_streak || 0 });
