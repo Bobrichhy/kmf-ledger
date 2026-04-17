@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Crown, Mail, Lock, ArrowRight, Sparkles, ShieldCheck, Github } from 'lucide-react';
+import { Crown, Mail, Lock, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
