@@ -1,62 +1,143 @@
 'use client';
 
 import Link from 'next/link';
-import { Crown, Home, BookOpen, LogOut } from 'lucide-react';
-import { useAccount, useDisconnect } from 'wagmi';
-import { Button } from '@/components/ui/button';
-import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import {
+  Crown, LayoutDashboard, BookOpen, BarChart3,
+  TrendingUp, LogOut, Wallet, Calendar, Target, Menu, X
+} from 'lucide-react';
+import { useAccount, useDisconnect, useConnect } from 'wagmi';
+import { injected } from 'wagmi/connectors';
+import { useState, type ReactNode } from 'react';
 
-interface DashboardLayoutProps {
-    children: ReactNode;
-}
+interface DashboardLayoutProps { children: ReactNode; }
+
+const navItems = [
+  { href: '/dashboard',         icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard/journal', icon: BookOpen,         label: 'Journal Entry' },
+  { href: '/dashboard/analytics', icon: BarChart3,       label: 'Deep Analytics' },
+  { href: '/dashboard/calendar',  icon: Calendar,        label: 'Trading Calendar' },
+  { href: '/dashboard/backtest',  icon: Target,          label: 'Backtesting Lab' },
+];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-    const { address, isConnected } = useAccount();
-    const { disconnect } = useDisconnect();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { connect } = useConnect();
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    return (
-        <div className="min-h-screen bg-[#0F0F1A] flex flex-col lg:flex-row">
-            {/* Royal Sidebar */}
-            <div className="w-full lg:w-72 glass-card border-r border-[#FFD700]/40 p-6 lg:p-8 flex flex-col royal-shine">
-                <div className="flex items-center gap-4 mb-12">
-                    <Crown className="w-12 h-12 text-[#FFD700]" />
-                    <div>
-                        <h1 className="text-4xl font-bold tracking-tighter" style={{ color: '#FFD700' }}>
-                            KMF
-                        </h1>
-                        <p className="text-[#E5E4E2] text-sm tracking-widest">KINGDOM LEDGER</p>
-                    </div>
-                </div>
+  const shortAddr = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
 
-                <nav className="space-y-3 flex-1">
-                    <Link
-                        href="/dashboard"
-                        className="flex items-center gap-4 px-6 py-4 rounded-2xl hover:bg-[#FFD700]/10 text-[#E5E4E2] transition-all"
-                    >
-                        <Home className="w-5 h-5" /> Dashboard
-                    </Link>
-                    <Link
-                        href="/dashboard/journal"
-                        className="flex items-center gap-4 px-6 py-4 rounded-2xl hover:bg-[#FFD700]/10 text-[#E5E4E2] transition-all"
-                    >
-                        <BookOpen className="w-5 h-5" /> New Journal Entry
-                    </Link>
-                </nav>
+  const handleConnect = () => {
+    connect({ connector: injected() });
+  };
 
-                {isConnected && (
-                    <Button
-                        onClick={() => disconnect()}
-                        className="mt-10 gold-button flex items-center gap-3 w-full"
-                    >
-                        <LogOut className="w-4 h-4" /> Disconnect Wallet
-                    </Button>
-                )}
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 p-6 lg:p-10 overflow-auto bg-[#0F0F1A]">
-                {children}
-            </div>
+  const NavContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-6 py-7 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border-panel)' }}>
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: 'var(--gold-glow)', border: '1px solid var(--border-subtle)' }}
+        >
+          <Crown className="w-5 h-5" style={{ color: 'var(--gold-bright)' }} />
         </div>
-    );
+        <div>
+          <span className="gold-text text-xl font-bold tracking-wider font-heading block">KMF</span>
+          <span className="text-[0.6rem] tracking-[0.22em] font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>Kingdom Ledger</span>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <p className="px-3 mb-3 text-[0.65rem] font-semibold tracking-widest uppercase" style={{ color: 'var(--text-faint)' }}>Navigation</p>
+        {navItems.map(({ href, icon: Icon, label }) => {
+          const active = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200"
+              style={{
+                background: active ? 'var(--gold-glow)' : 'transparent',
+                border: active ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                color: active ? 'var(--gold-bright)' : 'var(--text-muted)',
+              }}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0 transition-colors" style={{ color: active ? 'var(--gold-bright)' : undefined }} />
+              <span className="text-sm font-medium tracking-wide">{label}</span>
+              {active && (
+                <span
+                  className="ml-auto w-1.5 h-1.5 rounded-full"
+                  style={{ background: 'var(--gold-bright)' }}
+                />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer Branding */}
+      <div className="px-4 py-6 mt-auto text-center" style={{ borderTop: '1px solid var(--border-panel)' }}>
+        <p className="text-[0.6rem] tracking-[0.3em] font-bold uppercase" style={{ color: 'var(--text-faint)' }}>
+          Kingdom Minded Financial
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: 'var(--bg-primary)' }}>
+      
+      {/* Mobile Header */}
+      <header 
+        className="lg:hidden flex items-center justify-between px-5 py-4 royal-shine z-50 sticky top-0"
+        style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-panel)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gold-glow)', border: '1px solid var(--border-subtle)' }}>
+            <Crown className="w-4 h-4" style={{ color: 'var(--gold-bright)' }} />
+          </div>
+          <span className="font-heading font-bold gold-text tracking-wider">KMF Ledger</span>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-lg"
+          style={{ background: 'var(--bg-tertiary)', color: 'var(--gold-bright)' }}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </header>
+
+      {/* Sidebar (Desktop) */}
+      <aside
+        className="hidden lg:flex w-64 xl:w-72 flex-shrink-0 flex-col royal-shine h-screen sticky top-0"
+        style={{
+          background: 'var(--bg-secondary)',
+          borderRight: '1px solid var(--border-panel)',
+        }}
+      >
+        <NavContent />
+      </aside>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-40 flex flex-col pt-16 animate-in fade-in slide-in-from-top-4 duration-300 h-screen"
+          style={{ background: 'var(--bg-primary)' }}
+        >
+          <NavContent />
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+        <div className="p-5 lg:p-8 max-w-[1600px] mx-auto">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }
