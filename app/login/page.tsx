@@ -173,7 +173,7 @@ export default function AuthPage() {
             </button>
           </form>
 
-          {mode === 'login' && (
+          {mode !== 'forgot' && (
             <>
               <div className="relative my-8 text-center">
                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border-panel"></div></div>
@@ -190,7 +190,7 @@ export default function AuthPage() {
                   <path fill="#FBBC05" d="M5.8 14.06c-.23-.67-.36-1.39-.36-2.06s.13-1.39.36-2.06V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.62-2.87z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.62 2.87c.88-2.62 3.32-4.57 6.2-4.57z"/>
                 </svg>
-                CONTINUE WITH GOOGLE
+                {mode === 'login' ? 'LOGIN WITH GOOGLE' : 'SIGN UP WITH GOOGLE'}
               </button>
             </>
           )}
